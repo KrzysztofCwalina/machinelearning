@@ -6,17 +6,18 @@ using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Running;
+using BenchmarkDotNet.Toolchains.CsProj;
 using System.IO;
 
 namespace Microsoft.ML.Benchmarks
 {
-    public class Program
+    class Program
     {
         /// <summary>
         /// execute dotnet run -c Release and choose the benchmarks you want to run
         /// </summary>
         /// <param name="args"></param>
-        public static void Main(string[] args)
+        static void Main(string[] args)
         {
             BenchmarkSwitcher
                 .FromAssembly(typeof(Program).Assembly)
@@ -27,6 +28,7 @@ namespace Microsoft.ML.Benchmarks
         {
             var config = DefaultConfig.Instance.With(
                 Job.ShortRun.
+                With(CsProjCoreToolchain.NetCoreApp20).
                 With(BenchmarkDotNet.Environments.Platform.X64)).
                 With(MemoryDiagnoser.Default);
             return config;
