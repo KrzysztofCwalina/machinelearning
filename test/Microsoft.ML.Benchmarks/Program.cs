@@ -7,6 +7,7 @@ using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Running;
 using BenchmarkDotNet.Toolchains.CsProj;
+using BenchmarkDotNet.Toolchains.InProcess;
 using System.IO;
 
 namespace Microsoft.ML.Benchmarks
@@ -28,8 +29,7 @@ namespace Microsoft.ML.Benchmarks
         {
             var config = DefaultConfig.Instance.With(
                 Job.ShortRun.
-                With(CsProjCoreToolchain.NetCoreApp20).
-                With(BenchmarkDotNet.Environments.Platform.X64)).
+                With(InProcessToolchain.Instance)).
                 With(MemoryDiagnoser.Default);
             return config;
         }
