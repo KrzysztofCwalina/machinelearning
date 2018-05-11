@@ -10,7 +10,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading;
-using Microsoft.ML.Runtime.Internal.CpuMath;
 
 namespace Microsoft.ML.Runtime.Internal.Utilities
 {
@@ -1000,7 +999,7 @@ namespace Microsoft.ML.Runtime.Internal.Utilities
                     int toRead = (int)Math.Min(bytesToRead - offset, blockSize);
                     int read = reader.Read(work, 0, toRead);
                     Contracts.CheckDecode(read == toRead);
-                    MemUtils.MemoryCopy(src, (byte*)destination + offset, destinationSizeInBytes - offset, read);
+                    Buffer.MemoryCopy(src, (byte*)destination + offset, destinationSizeInBytes - offset, read);
                     offset += read;
                 }
                 Contracts.Assert(offset == bytesToRead);
