@@ -96,7 +96,7 @@ namespace Microsoft.ML
                         dataView.Schema.GetMetadata(MetadataUtils.Kinds.SlotNames, colIndex, ref slots);
 
                         bool appendEllipse = false;
-                        IEnumerable<DvText> slotNames = slots.Items(true).Select(x => x.Value);
+                        IEnumerable<DvText> slotNames = slots.ItemsLinq(true).Select(x => x.Value);
                         if (slots.Length > MaxSlotNamesToDisplay)
                         {
                             appendEllipse = true;

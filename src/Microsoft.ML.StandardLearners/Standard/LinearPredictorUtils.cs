@@ -208,7 +208,7 @@ namespace Microsoft.ML.Runtime.Learners
         public static IEnumerable<KeyValuePair<string, Single>> GetSortedLinearModelFeatureNamesAndWeights(Single bias,
             ref VBuffer<Single> weights, ref VBuffer<DvText> names)
         {
-            var orderedWeights = weights.Items()
+            var orderedWeights = weights.ItemsLinq()
                 .Where(weight => Math.Abs(weight.Value) >= Epsilon)
                 .OrderByDescending(kv => Math.Abs(kv.Value));
 

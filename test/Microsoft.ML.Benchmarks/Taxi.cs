@@ -11,14 +11,12 @@ using Microsoft.ML.Trainers;
 using Microsoft.ML.Transforms;
 using System;
 using System.Collections.Generic;
-using Microsoft.ML;
-using System.Threading.Tasks;
 
 namespace Microsoft.ML.Benchmarks
 {
-    public class TaxiBench
+    public class TaxiFareBench
     {
-        internal static ClassificationMetrics s_metrics;
+        static string s_metric;
         private static PredictionModel<TaxiFareData, TaxiFarePrediction> s_trainedModel;
         private static string s_dataPath;
         private static TaxiFareData[][] s_batches;
@@ -34,18 +32,19 @@ namespace Microsoft.ML.Benchmarks
             PaymentType = "CRD"
         };
 
-        [Benchmark]
-        public PredictionModel<TaxiFareData, TaxiFarePrediction> TrainIris() => TrainCore();
 
         [Benchmark]
-        public float PredictIris() => s_trainedModel.Predict(s_example).FareAmount;
+        public PredictionModel<TaxiFareData, TaxiFarePrediction> Train() => TrainCore();
 
-        [Benchmark]
-        public IEnumerable<TaxiFarePrediction> PredictIrisBatchOf1() => s_trainedModel.Predict(s_batches[0]);
-        [Benchmark]
-        public IEnumerable<TaxiFarePrediction> PredictIrisBatchOf2() => s_trainedModel.Predict(s_batches[1]);
-        [Benchmark]
-        public IEnumerable<TaxiFarePrediction> PredictIrisBatchOf5() => s_trainedModel.Predict(s_batches[2]);
+        //[Benchmark]
+        //public float Predict() => s_trainedModel.Predict(s_example).FareAmount;
+
+        //[Benchmark]
+        //public IEnumerable<TaxiFarePrediction> PredictBatchOf1() => s_trainedModel.Predict(s_batches[0]);
+        //[Benchmark]
+        //public IEnumerable<TaxiFarePrediction> PredictBatchOf2() => s_trainedModel.Predict(s_batches[1]);
+        //[Benchmark]
+        //public IEnumerable<TaxiFarePrediction> PredictBatchOf5() => s_trainedModel.Predict(s_batches[2]);
 
         [GlobalSetup]
         public void Setup()
@@ -55,8 +54,9 @@ namespace Microsoft.ML.Benchmarks
             TaxiFarePrediction prediction = s_trainedModel.Predict(s_example);
 
             var testData = new TextLoader(s_dataPath).CreateFrom<TaxiFareData>(useHeader: true);
-            var evaluator = new ClassificationEvaluator();
-            s_metrics = evaluator.Evaluate(s_trainedModel, testData);
+            var evaluator = new RegressionEvaluator();
+            var metrics = evaluator.Evaluate(s_trainedModel, testData);
+            s_metric = metrics.Rms.ToString();
 
             s_batches = new TaxiFareData[s_batchSizes.Length][];
             for (int i = 0; i < s_batches.Length; i++)
@@ -105,7 +105,7 @@ namespace Microsoft.ML.Benchmarks
 
             [Column("5")] public string PaymentType;
 
-            [Column("6", name: "Label")] public float FareAmount;         
+            [Column("6")] public float FareAmount;         
         }
 
         public class TaxiFarePrediction

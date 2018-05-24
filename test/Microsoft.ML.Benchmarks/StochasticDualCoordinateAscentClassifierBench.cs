@@ -17,7 +17,7 @@ namespace Microsoft.ML.Benchmarks
 {
     public class StochasticDualCoordinateAscentClassifierBench
     {
-        internal static ClassificationMetrics s_metrics;
+        static string s_metric;
         private static PredictionModel<IrisData, IrisPrediction> s_trainedModel;
         private static string s_dataPath;
         private static IrisData[][] s_batches;
@@ -53,7 +53,8 @@ namespace Microsoft.ML.Benchmarks
 
             var testData = new TextLoader(s_dataPath).CreateFrom<IrisData>(useHeader: true);
             var evaluator = new ClassificationEvaluator();
-            s_metrics = evaluator.Evaluate(s_trainedModel, testData);
+            var metrics = evaluator.Evaluate(s_trainedModel, testData);
+            s_metric = metrics.AccuracyMacro.ToString();
 
             s_batches = new IrisData[s_batchSizes.Length][];
             for (int i = 0; i < s_batches.Length; i++)

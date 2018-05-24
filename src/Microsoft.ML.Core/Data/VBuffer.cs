@@ -3,7 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Microsoft.ML.Runtime.Internal.Utilities;
 
 namespace Microsoft.ML.Runtime.Data
@@ -14,7 +16,7 @@ namespace Microsoft.ML.Runtime.Data
     /// is passed to a row cursor getter, the callee is free to take ownership of
     /// and re-use the arrays (Values and Indices).
     /// </summary>
-    public struct VBuffer<T>
+    public readonly struct VBuffer<T>
     {
         /// <summary>
         /// The logical length of the buffer.
@@ -429,10 +431,12 @@ namespace Microsoft.ML.Runtime.Data
             src.CopyTo(ref dst);
         }
 
-        public IEnumerable<KeyValuePair<int, T>> Items(bool all = false)
+        public IEnumerable<KeyValuePair<int, T>> ItemsLinq(bool all = false)
         {
             return VBufferUtils.Items(Values, Indices, Length, Count, all);
         }
+
+        public Enumerator Items(bool all = false) => new Enumerator(in this, all);
 
         public IEnumerable<T> DenseValues()
         {
@@ -462,6 +466,75 @@ namespace Microsoft.ML.Runtime.Data
             if (Count > 0 && Indices.TryFindIndexSorted(0, Count, slot, out index))
                 return Values[index];
             return default(T);
+        }
+
+        public struct Enumerator /*: IEnumerable<KeyValuePair<int, T>>, IEnumerator<KeyValuePair<int, T>>*/
+        {
+            int _index;
+            readonly int _count;
+            readonly T[] _values;
+            readonly int[] _indices;
+            readonly int _length;
+            readonly bool _all;
+
+            internal Enumerator(in VBuffer<T> buffer, bool all)
+            {
+                _index = -1;
+                _values = buffer.Values;
+                _count = buffer.Count;
+                _indices = null;
+                _all = all;
+                _length = buffer.Length;
+                if (!buffer.IsDense)
+                {
+                    _indices = buffer.Indices;
+                }
+            }
+
+            public bool MoveNext()
+                => !_all ? (++_index < _count) : (++_index < _length);
+
+            public KeyValuePair<int, T> Current
+                => (_indices == null) ? new KeyValuePair<int, T>(_index, _values[_index]) : CurrentSparse();
+
+            private KeyValuePair<int, T> CurrentSparse()
+            {
+                Debug.Assert(_indices == null);
+                if (!_all)
+                {
+                    return new KeyValuePair<int, T>(_indices[_index], _values[_index]);
+                }
+
+                var valuesIndex = _indices.FindIndexSorted(_index);
+                if (valuesIndex == -1) return new KeyValuePair<int, T>(_index, default);
+                return new KeyValuePair<int, T>(_index, _values[valuesIndex]);
+            }
+
+            private void ResetCore()
+            {
+                _index = 0;
+            }
+
+            public Enumerator GetEnumerator()
+            {
+                var copy = this;
+                copy.ResetCore();
+                return copy;
+            }
+
+            /*
+            object IEnumerator.Current => Current;
+            
+            IEnumerator IEnumerable.GetEnumerator() 
+                => GetEnumerator();
+            IEnumerator<KeyValuePair<int, T>> IEnumerable<KeyValuePair<int, T>>.GetEnumerator()
+                => GetEnumerator();
+
+            void IEnumerator.Reset()
+                => ResetCore();
+
+            void IDisposable.Dispose() { }
+            */
         }
     }
 }

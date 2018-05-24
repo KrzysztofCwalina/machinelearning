@@ -1750,7 +1750,7 @@ namespace Microsoft.ML.Runtime.KMeans
         public static void VerifyModelConsistency(VBuffer<Float>[] centroids)
         {
             foreach (var centroid in centroids)
-                Contracts.Check(centroid.Items().Select(x => x.Value).All(FloatUtils.IsFinite), "Model training failed: non-finite coordinates are generated");
+                Contracts.Check(centroid.ItemsLinq().Select(x => x.Value).All(FloatUtils.IsFinite), "Model training failed: non-finite coordinates are generated");
         }
     }
 }

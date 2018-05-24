@@ -79,7 +79,7 @@ namespace Microsoft.ML.Runtime.Learners
 
             public IEnumerator<Float> GetEnumerator()
             {
-                return _pred.Weight.Items(all: true).Select(iv => iv.Value).GetEnumerator();
+                return _pred.Weight.ItemsLinq(all: true).Select(iv => iv.Value).GetEnumerator();
             }
 
             IEnumerator IEnumerable.GetEnumerator()

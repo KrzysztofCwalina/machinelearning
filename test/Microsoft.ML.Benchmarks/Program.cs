@@ -8,15 +8,10 @@ using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Running;
 using BenchmarkDotNet.Columns;
 using BenchmarkDotNet.Reports;
-using BenchmarkDotNet.Toolchains.CsProj;
 using BenchmarkDotNet.Toolchains.InProcess;
-using System;
 using System.IO;
 using Microsoft.ML.Models;
-using Microsoft.ML.Runtime.Api;
-using Microsoft.ML.Trainers;
-using Microsoft.ML.Transforms;
-using Microsoft.ML.Benchmarks;
+using System;
 
 namespace Microsoft.ML.Benchmarks
 {
@@ -35,10 +30,11 @@ namespace Microsoft.ML.Benchmarks
 
         private static IConfig CreateClrVsCoreConfig()
         {
+            var toolchain = new InProcessToolchain(TimeSpan.FromMinutes(30), BenchmarkActionCodegen.DelegateCombine, true);
             var config = DefaultConfig.Instance.With(
                 Job.ShortRun.
-                With(InProcessToolchain.Instance)).
-                With(new ClassificationMetricsColumn("AccuracyMacro", "Macro-average accuracy of the model")).
+                With(toolchain)).
+                With(new MetricsColumn("AccuracyMacro", "Macro-average accuracy of the model")).
                 With(MemoryDiagnoser.Default);
             return config;
         }
@@ -55,12 +51,12 @@ namespace Microsoft.ML.Benchmarks
         }
     }
 
-    public class ClassificationMetricsColumn : IColumn
+    public class MetricsColumn : IColumn
     {
         string _metricName;
         string _legend;
 
-        public ClassificationMetricsColumn(string metricName, string legend)
+        public MetricsColumn(string metricName, string legend)
         {
             _metricName = metricName;
             _legend = legend;
@@ -78,9 +74,9 @@ namespace Microsoft.ML.Benchmarks
         public UnitType UnitType => UnitType.Dimensionless;
 
         public string GetValue(Summary summary, Benchmark benchmark, ISummaryStyle style)
-        {
-            var property = typeof(ClassificationMetrics).GetProperty(_metricName);
-            return property.GetValue(StochasticDualCoordinateAscentClassifierBench.s_metrics).ToString();
+        {           
+            var field = benchmark.Target.Type.GetField("s_metric", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.GetField);
+            return (string)field.GetValue(null);
         }
         public string GetValue(Summary summary, Benchmark benchmark) => GetValue(summary, benchmark, null);
 

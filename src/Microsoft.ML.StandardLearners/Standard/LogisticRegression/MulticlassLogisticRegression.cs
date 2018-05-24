@@ -766,7 +766,7 @@ namespace Microsoft.ML.Runtime.Learners
 
             for (int classNumber = 0; classNumber < _weights.Length; classNumber++)
             {
-                var orderedWeights = _weights[classNumber].Items().OrderByDescending(kv => Math.Abs(kv.Value));
+                var orderedWeights = _weights[classNumber].ItemsLinq().OrderByDescending(kv => Math.Abs(kv.Value));
                 foreach (var weight in orderedWeights)
                 {
                     var value = weight.Value;

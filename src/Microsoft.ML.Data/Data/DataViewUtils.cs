@@ -1385,7 +1385,7 @@ namespace Microsoft.ML.Runtime.Data
 
                     bool isLong = vbuf.Length > previewValues;
                     var suffix = isLong ? string.Format(",...(+{0})", vbuf.Length - previewValues) : "";
-                    var stringRep = string.Join(",", vbuf.Items(true).Take(previewValues)
+                    var stringRep = string.Join(",", vbuf.ItemsLinq(true).Take(previewValues)
                         .Select(
                             x =>
                             {
