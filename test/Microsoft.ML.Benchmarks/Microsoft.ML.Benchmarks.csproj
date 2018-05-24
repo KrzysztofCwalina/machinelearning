@@ -16,8 +16,10 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Microsoft.ML.StandardLearners\Microsoft.ML.StandardLearners.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.ML\Microsoft.ML.csproj" />
+    <ProjectReference Include="..\..\src\Microsoft.ML.FastTree\Microsoft.ML.FastTree.csproj" />
   </ItemGroup>
   <ItemGroup>
     <NativeAssemblyReference Include="CpuMathNative" />
+    <NativeAssemblyReference Include="FastTreeNative" />
   </ItemGroup>
 </Project>
